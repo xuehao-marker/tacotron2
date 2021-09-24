@@ -16,6 +16,7 @@ from loss_function import Tacotron2Loss
 from logger import Tacotron2Logger
 from hparams import create_hparams
 import plotting_utils
+import numpy as np
 
 def reduce_tensor(tensor, n_gpus):
     rt = tensor.clone()
