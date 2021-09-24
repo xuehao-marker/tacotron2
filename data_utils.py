@@ -110,7 +110,7 @@ class TextMelCollate():
             mel_padded[i, :, :mel.size(1)] = mel
             gate_padded[i, mel.size(1)-1:] = 1
             output_lengths[i] = mel.size(1)
-            speaker_embedding[i] = torch.from_numpy(batch[ids_sorted_decreasing][i][2])
+            speaker_embedding[i] = torch.from_numpy(batch[ids_sorted_decreasing[i]][2])
 
         return text_padded, input_lengths, mel_padded, gate_padded, \
             output_lengths, speaker_embedding
