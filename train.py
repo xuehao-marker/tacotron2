@@ -15,7 +15,7 @@ from data_utils import TextMelLoader, TextMelCollate
 from loss_function import Tacotron2Loss
 from logger import Tacotron2Logger
 from hparams import create_hparams
-
+import plotting_utils
 
 def reduce_tensor(tensor, n_gpus):
     rt = tensor.clone()
@@ -251,14 +251,25 @@ def train(output_directory, log_directory, checkpoint_path, warm_start, n_gpus,
                         output_directory, "checkpoint_{}".format(iteration))
                     save_checkpoint(model, optimizer, learning_rate, iteration,
                                     checkpoint_path)
+                    
+                    _, mel_outputs_postnet, _, alignments = y_pred
+                    mel_padded_GT, _ = y
+                    plotting_utils.plot_alignment(alignments.float().data.cpu().numpy()[0][:(out_len[0]),:].T,
+                                                 os.path.join(args.output_directory, args.plot_directory, 'step-{}-align.png'.format(iteration)),
+                                                 info='step={}, total_loss={:.5f}'.format(iteration, reduced_loss))
+                    plotting_utils.plot_spectrogram(mel_outputs_postnet.float().data.cpu().numpy()[0][:,:(out_len[0])].T,
+                                                 os.path.join(args.output_directory, args.plot_directory, 'step-{}-mel-spectrogram.png'.format(iteration)),
+                                                 info='step={}, mel_loss={:.5f}'.format(iteration, mel_loss.item()),
+                                                 target_spectrogram=mel_padded_GT.float().data.cpu().numpy()[0][:,:(out_len[0])].T)
 
             iteration += 1
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('-o', '--output_directory', type=str,
+    parser.add_argument('-o', '--output_directory', type=str, default='logs-Tacotron',
                         help='directory to save checkpoints')
+    parser.add_argument('-p', '--plot_directory, type=str, default='plots',
     parser.add_argument('-l', '--log_directory', type=str,
                         help='directory to save tensorboard logs')
     parser.add_argument('-c', '--checkpoint_path', type=str, default=None,
