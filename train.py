@@ -272,7 +272,7 @@ if __name__ == '__main__':
                         help='directory to save checkpoints')
     parser.add_argument('-p', '--plot_directory', type=str, default='plots',
                         help='directory to save plots')
-    parser.add_argument('-l', '--log_directory', type=str,
+    parser.add_argument('-l', '--log_directory', type=str, default='tacotron_event',
                         help='directory to save tensorboard logs')
     parser.add_argument('-c', '--checkpoint_path', type=str, default=None,
                         required=False, help='checkpoint path')
