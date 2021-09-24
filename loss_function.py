@@ -17,7 +17,7 @@ class Tacotron2Loss(nn.Module):
             nn.MSELoss()(mel_out_postnet, mel_target)
         gate_loss = nn.BCEWithLogitsLoss()(gate_out, gate_target)
         
-        coefficient = targets.shape[0] * torch.max(output_len) / (output_len.sum())
+        coefficient = mel_target.shape[0] * torch.max(output_len) / (output_len.sum())
         mel_loss = coefficient * mel_loss
         gate_loss = coefficient * gate_loss
         total_loss = mel_loss + gate_loss
