@@ -32,7 +32,7 @@ _ = model.cuda().eval().half()
 mel2linear = torchaudio.transforms.InverseMelScale(n_stft=513, n_mels=80)
 griffin_lim = torchaudio.transforms.GriffinLim(n_fft=1024, n_iter=60, win_length=800, hop_length=200)
 
-def txt2wav(num, text, output_path):
+def txt2wav(num, text, speaker_embedding, output_path):
     mels_dir = os.path.join(output_path, 'mels')
     align_dir = os.path.join(output_path, 'align')
     wavs_dir = os.path.join(output_path, 'wavs')
@@ -45,7 +45,7 @@ def txt2wav(num, text, output_path):
     sequence = torch.autograd.Variable(torch.from_numpy(sequence)).cuda().long()
 
     ###Decode text input and plot results
-    _, mel_outputs_postnet, _, alignments = model.inference(sequence)
+    _, mel_outputs_postnet, _, alignments = model.inference(sequence, speaker_embedding)[0]
     plot_data(os.path.join(align_dir, num + '.png'),
               (mel_outputs_postnet.float().data.cpu().numpy()[0],
                alignments.float().data.cpu().numpy()[0].T))
@@ -54,6 +54,10 @@ def txt2wav(num, text, output_path):
 
 fread = open()
 output_path = 'tacotron_output'
+speaker_embedding = np.load('.npy', allow_pickle=True).item()
 for line in fread.readlines():
     num, inference_data = line.strip().split('|', 1)
-    txt2wav((os.path.basename(num))[4:-4], inference_data, output_path)
+    speaker = os.path.basename(audiopath).split('_')[0]
+    speaker_embedding = np.reshape(speaker_embedding[speaker], (1, -1))
+
+    txt2wav((os.path.basename(num))[4:-4], inference_data, speaker_embedding, output_path)
