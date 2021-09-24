@@ -14,7 +14,7 @@ class TextMelLoader(torch.utils.data.Dataset):
         2) normalizes text and converts them to sequences of one-hot vectors
         3) computes mel-spectrograms from audio files.
     """
-    def __init__(self, audiopaths_and_text, hparams):
+    def __init__(self, audiopaths_and_text, speaker_embedding, hparams):
         self.audiopaths_and_text = load_filepaths_and_text(audiopaths_and_text)
         self.text_cleaners = hparams.text_cleaners
         self.max_wav_value = hparams.max_wav_value
@@ -25,14 +25,16 @@ class TextMelLoader(torch.utils.data.Dataset):
             hparams.n_mel_channels, hparams.sampling_rate, hparams.mel_fmin,
             hparams.mel_fmax)
         random.seed(hparams.seed)
-        random.shuffle(self.audiopaths_and_text)
+        self.speaker_embedding = speaker_embedding
 
     def get_mel_text_pair(self, audiopath_and_text):
         # separate filename and text
         audiopath, text = audiopath_and_text[0], audiopath_and_text[1]
         text = self.get_text(text)
         mel = self.get_mel(audiopath)
-        return (text, mel)
+        speaker = os.path.basename(audiopath).split('_')[0]
+        speaker_embedding = np.reshape(self.speaker_embedding[speaker], (1, -1))
+        return (text, mel, speaker_embedding)
 
     def get_mel(self, filename):
         if not self.load_mel_from_disk:
@@ -101,11 +103,14 @@ class TextMelCollate():
         gate_padded = torch.FloatTensor(len(batch), max_target_len)
         gate_padded.zero_()
         output_lengths = torch.LongTensor(len(batch))
+        
+        speaker_embedding = torch.FloatTensor(len(batch), 1, 256)
         for i in range(len(ids_sorted_decreasing)):
             mel = batch[ids_sorted_decreasing[i]][1]
             mel_padded[i, :, :mel.size(1)] = mel
             gate_padded[i, mel.size(1)-1:] = 1
             output_lengths[i] = mel.size(1)
+            speaker_embedding[i] = torch.from_numpy(batch[ids_sorted_decreasing][i][2])
 
         return text_padded, input_lengths, mel_padded, gate_padded, \
-            output_lengths
+            output_lengths, speaker_embedding
