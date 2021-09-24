@@ -43,6 +43,7 @@ def txt2wav(num, text, speaker_embedding, output_path):
 
     sequence = np.array(text_to_sequence(text, ['english_cleaners']))[None, :]
     sequence = torch.autograd.Variable(torch.from_numpy(sequence)).cuda().long()
+    speaker_embedding = torch.HalfTensor(speaker_embedding).cuda()
 
     ###Decode text input and plot results
     _, mel_outputs_postnet, _, alignments = model.inference(sequence, speaker_embedding)[0]
@@ -54,10 +55,10 @@ def txt2wav(num, text, speaker_embedding, output_path):
 
 fread = open()
 output_path = 'tacotron_output'
-speaker_embedding = np.load('.npy', allow_pickle=True).item()
+speaker_embeddings = np.load('.npy', allow_pickle=True).item()
 for line in fread.readlines():
     num, inference_data = line.strip().split('|', 1)
     speaker = os.path.basename(num).split('_')[0]
-    speaker_embedding = np.reshape(speaker_embedding[speaker], (1, -1))
+    speaker_embedding = np.reshape(speaker_embeddings[speaker], (1, -1))
 
     txt2wav((os.path.basename(num))[4:-4], inference_data, speaker_embedding, output_path)
