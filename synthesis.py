@@ -24,10 +24,13 @@ def plot_data(path, data, figsize=(20, 6)):
 hparams = create_hparams()
 
 ###Load model from checkpoint
-checkpoint_path = "logs-LJSpeech-1.1/tacotron2_statedict.pt"
+checkpoint_path = ""
 model = load_model(hparams)
 model.load_state_dict(torch.load(checkpoint_path)['state_dict'])
 _ = model.cuda().eval().half()
+
+mel2linear = torchaudio.transforms.InverseMelScale(n_stft=513, n_mels=80)
+griffin_lim = torchaudio.transforms.GriffinLim(n_fft=1024, n_iter=60, win_length=800, hop_length=200)
 
 def txt2wav(num, text, output_path):
     mels_dir = os.path.join(output_path, 'mels')
@@ -53,5 +56,4 @@ fread = open()
 output_path = 'tacotron_output'
 for line in fread.readlines():
     num, inference_data = line.strip().split('|', 1)
-    print(os.path.basename(num))
     txt2wav((os.path.basename(num))[4:-4], inference_data, output_path)
