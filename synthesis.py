@@ -57,7 +57,7 @@ output_path = 'tacotron_output'
 speaker_embedding = np.load('.npy', allow_pickle=True).item()
 for line in fread.readlines():
     num, inference_data = line.strip().split('|', 1)
-    speaker = os.path.basename(audiopath).split('_')[0]
+    speaker = os.path.basename(num).split('_')[0]
     speaker_embedding = np.reshape(speaker_embedding[speaker], (1, -1))
 
     txt2wav((os.path.basename(num))[4:-4], inference_data, speaker_embedding, output_path)
