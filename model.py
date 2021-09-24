@@ -524,6 +524,7 @@ class Tacotron2(nn.Module):
         embedded_inputs = self.embedding(inputs).transpose(1, 2)
         encoder_outputs = self.encoder.inference(embedded_inputs)
         
+        speaker_embedding = torch.unsqueeze(speaker_embedding, 0)
         speaker_embedding = speaker_embedding.repeat(1, encoder_outputs.size(1), 1)
         speaker_embedding = self.speaker_fc(speaker_embedding)
         encoder_outputs = torch.cat((encoder_outputs, speaker_embedding), dim=-1)
