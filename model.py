@@ -496,7 +496,7 @@ class Tacotron2(nn.Module):
             outputs[1].data.masked_fill_(mask, 0.0)
             outputs[2].data.masked_fill_(mask[:, 0, :], 1e3)  # gate energies
 
-        return outputs
+        return outputs, output_lengths
 
     def forward(self, inputs):
         text_inputs, text_lengths, mels, max_len, output_lengths, speaker_embedding = inputs
