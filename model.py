@@ -483,7 +483,7 @@ class Tacotron2(nn.Module):
         speaker_embedding = to_gpu(speaker_embedding).float()
 
         return (
-            (text_padded, input_lengths, mel_padded, max_len, output_lengths),
+            (text_padded, input_lengths, mel_padded, max_len, output_lengths, speaker_embedding),
             (mel_padded, gate_padded))
 
     def parse_output(self, outputs, output_lengths=None):
