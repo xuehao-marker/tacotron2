@@ -41,8 +41,9 @@ def init_distributed(hparams, n_gpus, rank, group_name):
 
 def prepare_dataloaders(hparams):
     # Get data, data loaders and collate function ready
-    trainset = TextMelLoader(hparams.training_files, hparams)
-    valset = TextMelLoader(hparams.validation_files, hparams)
+    speaker_embedding = np.load('.npy', allow_pickle=True).item()
+    trainset = TextMelLoader(hparams.training_files, speaker_embedding, hparams)
+    valset = TextMelLoader(hparams.validation_files, speaker_embedding, hparams)
     collate_fn = TextMelCollate(hparams.n_frames_per_step)
 
     if hparams.distributed_run:
