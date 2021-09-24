@@ -65,6 +65,7 @@ def prepare_directories_and_logger(output_directory, log_directory, rank):
     if rank == 0:
         if not os.path.isdir(output_directory):
             os.makedirs(output_directory)
+            os.makedirs(os.path.join(output_directory, args.plot_directory))
             os.chmod(output_directory, 0o775)
         logger = Tacotron2Logger(os.path.join(output_directory, log_directory))
     else:
@@ -256,13 +257,13 @@ def train(output_directory, log_directory, checkpoint_path, warm_start, n_gpus,
                     
                     _, mel_outputs_postnet, _, alignments = y_pred
                     mel_padded_GT, _ = y
-                    plotting_utils.plot_alignment(alignments.float().data.cpu().numpy()[0][:(out_len[0]),:].T,
+                    plotting_utils.plot_alignment(alignments.float().data.cpu().numpy()[0].T,
                                                  os.path.join(args.output_directory, args.plot_directory, 'step-{}-align.png'.format(iteration)),
                                                  info='step={}, total_loss={:.5f}'.format(iteration, reduced_loss))
-                    plotting_utils.plot_spectrogram(mel_outputs_postnet.float().data.cpu().numpy()[0][:,:(out_len[0])].T,
+                    plotting_utils.plot_spectrogram(mel_outputs_postnet.float().data.cpu().numpy()[0].T,
                                                  os.path.join(args.output_directory, args.plot_directory, 'step-{}-mel-spectrogram.png'.format(iteration)),
                                                  info='step={}, mel_loss={:.5f}'.format(iteration, mel_loss.item()),
-                                                 target_spectrogram=mel_padded_GT.float().data.cpu().numpy()[0][:,:(out_len[0])].T)
+                                                 target_spectrogram=mel_padded_GT.float().data.cpu().numpy()[0].T)
 
             iteration += 1
 
