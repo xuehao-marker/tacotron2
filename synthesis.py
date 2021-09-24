@@ -29,9 +29,6 @@ model = load_model(hparams)
 model.load_state_dict(torch.load(checkpoint_path)['state_dict'])
 _ = model.cuda().eval().half()
 
-mel2linear = torchaudio.transforms.InverseMelScale(n_stft=513, n_mels=80)
-griffin_lim = torchaudio.transforms.GriffinLim(n_fft=1024, n_iter=60, win_length=800, hop_length=200)
-
 def txt2wav(num, text, output_path):
     mels_dir = os.path.join(output_path, 'mels')
     align_dir = os.path.join(output_path, 'align')
@@ -50,16 +47,10 @@ def txt2wav(num, text, output_path):
               (mel_outputs_postnet.float().data.cpu().numpy()[0],
                alignments.float().data.cpu().numpy()[0].T))
 
-    ###transform mel-spectrogram to waveform with griffin-lim using torchaudio packages
-    mels = mel_outputs_postnet.float().data.cpu()[0]
-    mels = np.power(10.0, mels)
-    linear_spectrogram = mel2linear(mels)
-    waveform = griffin_lim(linear_spectrogram)
-    wavfile.write(os.path.join(wavs_dir, num + '.wav'), 16000, waveform.numpy())
     np.save(os.path.join(mels_dir, num + '.npy'), mel_outputs_postnet.float().data.cpu().numpy()[0], allow_pickle=False)
 
-fread = open('/data07/xuehao/DATA/l2arctic/Model_data/adaptation_test_character_100')
-output_path = 'tacotron_output_adaptation'
+fread = open()
+output_path = 'tacotron_output'
 for line in fread.readlines():
     num, inference_data = line.strip().split('|', 1)
     print(os.path.basename(num))
